@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # ----------- CONFIG ------------
-REPO="luandnh/ltek_learn_mlops"        # GitHub repo name
-ARTIFACT_NAME="mlruns-logs"      # Artifact name from upload-artifact
-TARGET_DIR="./mlruns"            # Where to extract mlruns to
-RUN_ID=${1:-${GITHUB_RUN_ID}}     # GitHub Actions Run ID (auto from env if available)
+REPO="luandnh/ltek_learn_mlops"         # GitHub repo name
+ARTIFACT_NAME="mlruns-logs"             # Artifact name from upload-artifact
+TARGET_DIR="./mlruns"                   # Where to extract mlruns to
+RUN_ID=${1:-${GITHUB_RUN_ID}}           # GitHub Actions Run ID (auto from env if available)
 
 # Optional: GitHub token if required for private repo access
 GITHUB_TOKEN=${GITHUB_TOKEN:-""}
