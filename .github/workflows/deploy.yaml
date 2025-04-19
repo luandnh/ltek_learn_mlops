@@ -172,7 +172,7 @@ jobs:
             🔹 [CI Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
 
   deploy:
-    runs-on: ltek_vps01
+    runs-on: self-hosted
     needs: build_and_push
     if: github.ref_type == 'tag' && (contains(github.ref, 'dev') || contains(github.ref, 'staging') || contains(github.ref, 'prod'))
     steps:
@@ -186,6 +186,7 @@ jobs:
 
       - name: Sync mlruns from artifact and restart mlflow-ui
         run: |
+          cp -Rf scripts ${{ env.MLFLOW_UI_FOLDER }}
           cd ${{ env.MLFLOW_UI_FOLDER }}
           chmod +x ./scripts/sync_mlruns_artifact.sh
           ./scripts/sync_mlruns_artifact.sh ${{ github.run_id }}
