@@ -13,6 +13,7 @@ import pandas as pd
 import json
 import warnings
 import os
+from datetime import datetime
 
 ENVIRONMENT = os.getenv("ENVIRONMENT", "DEV").upper()
 logger.info(f"Running in environment: {ENVIRONMENT}")
@@ -121,6 +122,7 @@ best_run_id = None
 best_model_name = ""
 best_params = None
 results = []
+train_time = datetime.now().isoformat()
 
 # 4. Grid search + logging
 logger.info("Start model training and logging to MLflow...")
@@ -150,6 +152,7 @@ for model_name, config in model_configs.items():
                 signature = infer_signature(X_test, y_pred)
 
                 # Logging to MLflow
+                mlflow.set_tag("train_time", train_time)
                 mlflow.log_param("model_type", model_name)
                 mlflow.log_params(params)
                 mlflow.log_metric("accuracy", acc)

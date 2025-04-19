@@ -2,8 +2,8 @@ version: "3.9"
 
 services:
   flask-app:
-    image: luandnh1998/mlflow-flask-app:${API_VERSION}
-    container_name: mlflow-flask-app
+    image: luandnh1998/mlflow-flask-api:dev-latest
+    container_name: mlflow-flask-app-dev
     ports:
       - "5001:5000"
     environment:
@@ -11,8 +11,9 @@ services:
       - MODEL_VERSION=latest
     volumes:
       - ./model_comparison_results.json:/app/model_comparison_results.json
-    depends_on:
-      - mlflow-ui
+    networks:
+      - proxy
+
 
   mlflow-ui:
     image: ghcr.io/mlflow/mlflow:latest
@@ -24,3 +25,10 @@ services:
       - ./mlruns:/mlflow/mlruns
     ports:
       - "5000:5000"
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true
+    name: proxy

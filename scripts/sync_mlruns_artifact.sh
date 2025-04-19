@@ -15,6 +15,16 @@ if ! command -v gh &> /dev/null; then
   exit 1
 fi
 
+if ! command -v unzip &> /dev/null; then
+  echo "❌ 'unzip' is required. Install it with 'sudo apt install unzip -y'"
+  exit 1
+fi
+
+if ! command -v rsync &> /dev/null; then
+  echo "❌ 'rsync' is required. Install it with 'sudo apt install rsync -y'"
+  exit 1
+fi
+
 if [ -z "$RUN_ID" ]; then
   echo "⚠️  Usage: $0 <run-id>"
   echo "ℹ️  You can find run-id from GitHub Actions URL or 'gh run list'"
@@ -26,14 +36,25 @@ if [ -n "$GITHUB_TOKEN" ]; then
   echo "$GITHUB_TOKEN" | gh auth login --with-token
 fi
 
-# ----------- DOWNLOAD ARTIFACT -----------
-echo "📥 Downloading artifact '$ARTIFACT_NAME' from run $RUN_ID..."
+# ----------- CREATE PROJECT-LOCAL TEMP DIR -----------
 mkdir -p "$TARGET_DIR"
-cd "$TARGET_DIR" || exit 1
 
+TEMP_DIR="./tmp_mlruns_sync_$(date +%s)"
+mkdir -p "$TEMP_DIR"
+echo "📥 Downloading artifact '$ARTIFACT_NAME' from run $RUN_ID into temp dir: $TEMP_DIR"
+
+cd "$TEMP_DIR" || exit 1
 gh run download "$RUN_ID" -n "$ARTIFACT_NAME"
 
 cd ..
+# ----------- EXTRACT & SYNC -----------
+echo "📂 Extracting and syncing to '$TARGET_DIR'..."
+rsync -a "$TEMP_DIR/" "$TARGET_DIR/"
+
+# ----------- CLEANUP -----------
+cd ..
+rm -rf "$TEMP_DIR"
+
 echo "✅ Sync completed. mlruns is available at: $TARGET_DIR"
 
 # Optional: re-deploy service
