@@ -1,0 +1,25 @@
+version: '3.9'
+
+services:
+    image: luandnh98/mlflow-flask-app
+    container_name: mlflow-flask-app
+    ports:
+      - "5000:5000"
+    environment:
+      - MODEL_NAME=BestClassifierModel
+      - MODEL_VERSION=latest
+    volumes:
+      - ./model_comparison_results.json:/app/model_comparison_results.json
+    depends_on:
+      - mlflow-ui
+
+  mlflow-ui:
+    image: ghcr.io/mlflow/mlflow:latest
+    container_name: mlflow-ui
+    command: mlflow ui --host 0.0.0.0 --port 5001
+    environment:
+      - MLFLOW_TRACKING_URI=file:/mlflow/mlruns
+    volumes:
+      - ./mlruns:/mlflow/mlruns
+    ports:
+      - "5001:5001"
