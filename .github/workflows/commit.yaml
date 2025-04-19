@@ -1,0 +1,30 @@
+name: Commit Notification
+
+on:
+  push:
+    branches:
+      - "*"
+  pull_request:
+    branches:
+      - "*"
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: send telegram message on commit or PR
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          format: markdown
+          message: |
+            🚨 *New GitHub Activity Notification*
+            🔹 Repository: [${{ github.repository }}](https://github.com/${{ github.repository }})
+            🔹 Branch: `${{ github.ref_name }}`
+            🔹 Actor: `${{ github.actor }}`
+            🔹 Event: `${{ github.event_name }}`
+            🔹 Message: `${{ github.event.head_commit.message || github.event.pull_request.title }}`
+
+            🔗 Commit: [View Commit](https://github.com/${{ github.repository }}/commit/${{ github.sha }})
+            🔗 Run: [GitHub Actions Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})

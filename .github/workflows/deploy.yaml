@@ -43,10 +43,24 @@ jobs:
           pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Extract tag and set ENVIRONMENT
+        id: env_tag
+        run: |
+          TAG_NAME=${GITHUB_REF##*/}
+          ENVIRONMENT="PROD"
+          if [[ "$TAG_NAME" == *dev* ]]; then
+            ENVIRONMENT="DEV"
+          elif [[ "$TAG_NAME" == *uat* ]]; then
+            ENVIRONMENT="STAGING"
+          elif [[ "$TAG_NAME" == *fix* ]]; then
+            ENVIRONMENT="FIX"
+          fi
+          echo "ENVIRONMENT=$ENVIRONMENT" >> $GITHUB_ENV
+
       - name: Run training and log to MLflow
-        env:
-          ENVIRONMENT: PROD
         run: python train_and_log.py
+        env:
+          ENVIRONMENT: ${{ env.ENVIRONMENT }}
 
       - name: Upload model comparison results
         uses: actions/upload-artifact@v4
@@ -144,26 +158,3 @@ jobs:
             🔹 Branch: `${{ github.ref_name }}`
             🔹 Tags: `${{ env.IMAGE_TAG }}`
             🔹 [CI Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
-
-  # deploy:
-  #   runs-on: your-self-hosted-runner-label
-  #   needs: build_and_push
-  #   if: github.ref_type == 'tag' && contains(github.ref, 'dev')
-  #   steps:
-  #     - name: Deploy via Docker Compose
-  #       run: |
-  #         cd ${{ env.REPOSITORY_FOLDER }}
-  #         API_VERSION=${{ env.IMAGE_TAG }} docker compose pull && docker compose up -d
-
-  #     - name: Notify via Telegram (Deploy)
-  #       uses: appleboy/telegram-action@master
-  #       with:
-  #         to: ${{ secrets.TELEGRAM_TO }}
-  #         token: ${{ secrets.TELEGRAM_TOKEN }}
-  #         format: markdown
-  #         message: |
-  #           🧪 *MLflow Flask API Deployed to DEV*
-  #           🔹 Repo: [${{ github.repository }}](https://github.com/${{ github.repository }})
-  #           🔹 Tag: `${{ github.ref_name }}`
-  #           🔹 Version: `${{ env.IMAGE_TAG }}`
-  #           🔹 [CI Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})

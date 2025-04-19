@@ -1,7 +1,8 @@
-version: '3.9'
+version: "3.9"
 
 services:
-    image: luandnh98/mlflow-flask-app
+  flask-app:
+    image: luandnh1998/mlflow-flask-app
     container_name: mlflow-flask-app
     ports:
       - "5000:5000"

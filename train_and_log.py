@@ -23,29 +23,64 @@ logger.add("training.log", rotation="1 MB", level="DEBUG")
 
 # 1. Generate classification data
 logger.info("Generating synthetic classification dataset...")
-X, y = make_classification(n_samples=1000, n_features=20,
-                           n_informative=15, n_redundant=5,
-                           n_classes=2, random_state=42)
+X, y = make_classification(
+    n_samples=1000,
+    n_features=20,
+    n_informative=15,
+    n_redundant=5,
+    n_classes=2,
+    random_state=42,
+)
 X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42)
+    X, y, test_size=0.2, random_state=42
+)
 
 # 2. Define model configs and tuning hyperparameters
 logger.info("Defining model configs and hyperparameter grids...")
 
-# Simple config for fast testing in DEV
-simple_model_configs = {
+# Model configs for DEV
+dev_model_configs = {
     "LogisticRegression": {
         "model_class": LogisticRegression,
         "param_grid": {
-            "C": [1.0],
-            "solver": ["liblinear"],
             "penalty": ["l2"],
+            "C": [0.1, 1.0],
+            "solver": ["liblinear"],
         },
     }
 }
 
-# Full config for STAGING/PROD
-full_model_configs = {
+# Model configs for STAGING
+staging_model_configs = {
+    "LogisticRegression": {
+        "model_class": LogisticRegression,
+        "param_grid": {
+            "penalty": ["l2"],
+            "C": [0.1, 1.0],
+            "solver": ["liblinear"],
+        },
+    },
+    "RandomForest": {
+        "model_class": RandomForestClassifier,
+        "param_grid": {
+            "n_estimators": [100, 200],
+            "max_depth": [None, 10],
+            "min_samples_split": [2, 5],
+            "min_samples_leaf": [1, 2],
+            "bootstrap": [True],
+        },
+    },
+}
+# Model configs for PRODUCTION
+production_model_configs = {
+    "LogisticRegression": {
+        "model_class": LogisticRegression,
+        "param_grid": {
+            "penalty": ["l2"],
+            "C": [0.1, 1.0],
+            "solver": ["liblinear"],
+        },
+    },
     "RandomForest": {
         "model_class": RandomForestClassifier,
         "param_grid": {
@@ -69,20 +104,14 @@ full_model_configs = {
             "reg_alpha": [0, 1],
         },
     },
-    "LogisticRegression": {
-        "model_class": LogisticRegression,
-        "param_grid": {
-            "penalty": ["l2"],
-            "C": [0.1, 1.0],
-            "solver": ["liblinear"],
-        },
-    }
 }
 
-if ENVIRONMENT == "DEV":
-    model_configs = simple_model_configs
+if ENVIRONMENT == "PRODUCTION":
+    model_configs = production_model_configs
+elif ENVIRONMENT == "STAGING":
+    model_configs = staging_model_configs
 else:
-    model_configs = full_model_configs
+    model_configs = dev_model_configs
 
 # 3. Set MLflow experiment
 mlflow.set_experiment("mlflow_full_model_comparison")
@@ -104,7 +133,9 @@ for model_name, config in model_configs.items():
             logger.debug(f"Training {model_name} with params: {params}")
             try:
                 if model_name == "XGBoost":
-                    model = ModelClass(**params, use_label_encoder=False, eval_metric="logloss")
+                    model = ModelClass(
+                        **params, use_label_encoder=False, eval_metric="logloss"
+                    )
                 elif model_name == "LogisticRegression":
                     model = ModelClass(**params, max_iter=1000)
                 else:
@@ -126,15 +157,11 @@ for model_name, config in model_configs.items():
                     sk_model=model,
                     artifact_path="model",
                     signature=signature,
-                    input_example=input_example
+                    input_example=input_example,
                 )
 
                 # Save result
-                results.append({
-                    "model": model_name,
-                    "params": params,
-                    "accuracy": acc
-                })
+                results.append({"model": model_name, "params": params, "accuracy": acc})
 
                 logger.info(f"{model_name} - Accuracy: {acc:.4f}")
 
