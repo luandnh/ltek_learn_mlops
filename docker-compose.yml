@@ -2,10 +2,10 @@ version: "3.9"
 
 services:
   flask-app:
-    image: luandnh1998/mlflow-flask-app
+    image: luandnh1998/mlflow-flask-app:dev-latest
     container_name: mlflow-flask-app
     ports:
-      - "5000:5000"
+      - "5001:5000"
     environment:
       - MODEL_NAME=BestClassifierModel
       - MODEL_VERSION=latest

@@ -11,8 +11,9 @@ COPY requirements.txt ./
 COPY app.py ./
 
 # Install dependencies
-RUN pip install --upgrade pip \
-    && pip install --no-cache-dir -r requirements.txt
+RUN pip install --upgrade pip
+
+RUN pip install --no-cache-dir --root-user-action=ignore -r requirements.txt
 
 # Set permissions and switch to non-root
 RUN chown -R appuser:appgroup /app
