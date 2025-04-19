@@ -28,18 +28,10 @@ fi
 
 # ----------- DOWNLOAD ARTIFACT -----------
 echo "📥 Downloading artifact '$ARTIFACT_NAME' from run $RUN_ID..."
-mkdir -p artifacts
-cd artifacts || exit 1
-
-# Clean old if exists
-rm -f "$ARTIFACT_NAME".zip
+mkdir -p "$TARGET_DIR"
+cd "$TARGET_DIR" || exit 1
 
 gh run download "$RUN_ID" -n "$ARTIFACT_NAME"
-
-# ----------- EXTRACT + MOVE TO mlruns/ -----------
-echo "📂 Extracting and syncing to '$TARGET_DIR'..."
-mkdir -p "$TARGET_DIR"
-unzip "$ARTIFACT_NAME".zip -d "$TARGET_DIR"
 
 cd ..
 echo "✅ Sync completed. mlruns is available at: $TARGET_DIR"
