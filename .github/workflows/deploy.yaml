@@ -175,14 +175,11 @@ jobs:
     runs-on: self-hosted
     needs: build_and_push
     if: github.ref_type == 'tag' && (contains(github.ref, 'dev') || contains(github.ref, 'staging') || contains(github.ref, 'prod'))
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Set up GitHub CLI
-        uses: cli/gh-action@v2
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Sync mlruns from artifact and restart mlflow-ui
         run: |
