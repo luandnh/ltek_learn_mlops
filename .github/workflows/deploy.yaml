@@ -12,6 +12,7 @@ env:
 
 jobs:
   build_and_test:
+    name: 🥪 Build & Lint Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -28,6 +29,7 @@ jobs:
           python -m py_compile app.py
 
   train_and_log_model:
+    name: 🧠 Train & Log MLflow Model
     runs-on: ubuntu-latest
     needs: build_and_test
     steps:
@@ -78,6 +80,7 @@ jobs:
           path: mlruns/
 
   setup_build_env:
+    name: ⚙️ Setup Build Environment
     runs-on: ubuntu-latest
     needs: train_and_log_model
     outputs:
@@ -95,6 +98,7 @@ jobs:
           echo "TARGET_BRANCH=${{ github.ref_name }}" >> $GITHUB_OUTPUT
 
   build_and_push:
+    name: 🛠️ Build & Push Docker Image
     runs-on: ubuntu-latest
     needs: setup_build_env
     env:
@@ -171,52 +175,117 @@ jobs:
             🔹 Tags: `${{ env.IMAGE_TAG }}`
             🔹 [CI Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
 
-  deploy:
+  deploy_dev:
+    name: 🚀 Deploy to Dev
     runs-on: self-hosted
     needs: build_and_push
-    if: github.ref_type == 'tag' && (contains(github.ref, 'dev') || contains(github.ref, 'staging') || contains(github.ref, 'prod'))
+    if: github.ref_type == 'tag' && contains(github.ref, 'dev')
     env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      BRANCH_TAG: dev
+      PROJECT_FOLDER: /home/ltek/projects/mlflow-flask-api-dev
+      MLFLOW_UI_FOLDER: /home/ltek/projects/mlflow-ui
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Sync mlruns from artifact and restart mlflow-ui
+      - name: Sync mlruns from artifact
         run: |
           cp -Rf scripts ${{ env.MLFLOW_UI_FOLDER }}
           cd ${{ env.MLFLOW_UI_FOLDER }}
           chmod +x ./scripts/sync_mlruns_artifact.sh
           ./scripts/sync_mlruns_artifact.sh ${{ github.run_id }}
 
-      - name: Set dynamic repository folder
+      - name: Extract tag and version
         run: |
           TAG_NAME=${GITHUB_REF##*/}
-          BRANCH_TAG="default"
-          if [[ "$TAG_NAME" == *dev* ]]; then
-            BRANCH_TAG="dev"
-          elif [[ "$TAG_NAME" == *staging* ]]; then
-            BRANCH_TAG="staging"
-          elif [[ "$TAG_NAME" == *prod* ]]; then
-            BRANCH_TAG="prod"
-          fi
-          echo "BRANCH_TAG=$BRANCH_TAG" >> $GITHUB_ENV
-          echo "PROJECT_FOLDER=/home/ltek/projects/mlflow-flask-api-$BRANCH_TAG" >> $GITHUB_ENV
+          echo "IMAGE_TAG=${{ env.BRANCH_TAG }}-${TAG_NAME}" >> $GITHUB_ENV
 
-      - name: Deploy via Docker Compose
+      - name: Deploy with Docker Compose
         run: |
           cd ${{ env.PROJECT_FOLDER }}
           API_VERSION=${{ env.IMAGE_TAG }} docker compose pull && docker compose up -d
 
-      - name: Notify via Telegram (Deploy)
+      - name: Telegram Notify
         uses: appleboy/telegram-action@master
         with:
           to: ${{ secrets.TELEGRAM_TO }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
           format: markdown
           message: |
-            🚀 *MLflow Flask API Deployed*
-            🔹 Repo: [${{ github.repository }}](https://github.com/${{ github.repository }})
+            🚀 *DEV Deployed*
             🔹 Tag: `${{ github.ref_name }}`
             🔹 Version: `${{ env.IMAGE_TAG }}`
-            🔹 Target: `${{ env.BRANCH_TAG }}`
+            🔹 [CI Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+  deploy_staging:
+    name: 🚀 Deploy to Staging
+    runs-on: self-hosted
+    needs: build_and_push
+    if: github.ref_type == 'tag' && contains(github.ref, 'staging')
+    env:
+      BRANCH_TAG: staging
+      PROJECT_FOLDER: /home/ltek/projects/mlflow-flask-api-staging
+      MLFLOW_UI_FOLDER: /home/ltek/projects/mlflow-ui
+    steps:
+      - uses: actions/checkout@v4
+      - name: Sync mlruns from artifact
+        run: |
+          cp -Rf scripts ${{ env.MLFLOW_UI_FOLDER }}
+          cd ${{ env.MLFLOW_UI_FOLDER }}
+          chmod +x ./scripts/sync_mlruns_artifact.sh
+          ./scripts/sync_mlruns_artifact.sh ${{ github.run_id }}
+      - name: Extract tag and version
+        run: |
+          TAG_NAME=${GITHUB_REF##*/}
+          echo "IMAGE_TAG=${{ env.BRANCH_TAG }}-${TAG_NAME}" >> $GITHUB_ENV
+      - name: Deploy with Docker Compose
+        run: |
+          cd ${{ env.PROJECT_FOLDER }}
+          API_VERSION=${{ env.IMAGE_TAG }} docker compose pull && docker compose up -d
+      - name: Telegram Notify
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          format: markdown
+          message: |
+            🚀 *STAGING Deployed*
+            🔹 Tag: `${{ github.ref_name }}`
+            🔹 Version: `${{ env.IMAGE_TAG }}`
+            🔹 [CI Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+  deploy_production:
+    name: 🚀 Deploy to Production
+    runs-on: self-hosted
+    needs: build_and_push
+    if: github.ref_type == 'tag' && contains(github.ref, 'prod')
+    env:
+      BRANCH_TAG: prod
+      PROJECT_FOLDER: /home/ltek/projects/mlflow-flask-api-prod
+      MLFLOW_UI_FOLDER: /home/ltek/projects/mlflow-ui
+    steps:
+      - uses: actions/checkout@v4
+      - name: Sync mlruns from artifact
+        run: |
+          cp -Rf scripts ${{ env.MLFLOW_UI_FOLDER }}
+          cd ${{ env.MLFLOW_UI_FOLDER }}
+          chmod +x ./scripts/sync_mlruns_artifact.sh
+          ./scripts/sync_mlruns_artifact.sh ${{ github.run_id }}
+      - name: Extract tag and version
+        run: |
+          TAG_NAME=${GITHUB_REF##*/}
+          echo "IMAGE_TAG=${{ env.BRANCH_TAG }}-${TAG_NAME}" >> $GITHUB_ENV
+      - name: Deploy with Docker Compose
+        run: |
+          cd ${{ env.PROJECT_FOLDER }}
+          API_VERSION=${{ env.IMAGE_TAG }} docker compose pull && docker compose up -d
+      - name: Telegram Notify
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          format: markdown
+          message: |
+            🚀 *PRODUCTION Deployed*
+            🔹 Tag: `${{ github.ref_name }}`
+            🔹 Version: `${{ env.IMAGE_TAG }}`
             🔹 [CI Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
