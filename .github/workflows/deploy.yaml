@@ -194,7 +194,7 @@ jobs:
           cp -Rf scripts ${{ env.MLFLOW_UI_FOLDER }}
           cd ${{ env.MLFLOW_UI_FOLDER }}
           chmod +x ./scripts/sync_mlruns_artifact.sh
-          ./scripts/sync_mlruns_artifact.sh ${{ github.run_id }}
+          GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} ./scripts/sync_mlruns_artifact.sh ${{ github.run_id }}
 
       - name: Extract tag and version
         run: |
