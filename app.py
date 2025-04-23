@@ -4,6 +4,7 @@ import mlflow.sklearn
 import os
 import json
 from loguru import logger
+from mlflow.exceptions import MlflowException
 
 
 # Env config
@@ -17,8 +18,13 @@ MODEL_NAME = os.getenv("MODEL_NAME", "BestClassifierModel")
 MODEL_STAGE = os.getenv("MODEL_STAGE", "latest")
 
 logger.info(f"Starting MLflow Classifier API - Version: {APP_VERSION}")
-logger.info(f"Loading model: {MODEL_NAME} ({MODEL_STAGE})...")
-model = mlflow.sklearn.load_model(f"models:/{MODEL_NAME}/{MODEL_STAGE}")
+
+try:
+    logger.info(f"Loading model: {MODEL_NAME} ({MODEL_STAGE})...")
+    model = mlflow.sklearn.load_model(f"models:/{MODEL_NAME}/{MODEL_STAGE}")
+except MlflowException as e:
+    logger.error(f"Could not load model: {e}")
+    model = None
 
 # Initialize app + API
 app = Flask(__name__)
@@ -68,6 +74,11 @@ def scalar_index():
     </body>
     </html>"""
     return Response(html_content, mimetype="text/html")
+
+
+@app.route("/health")
+def health():
+    return {"status": "ok", "model_loaded": model is not None}, 200
 
 
 info_model = api.model(

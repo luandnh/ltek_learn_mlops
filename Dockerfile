@@ -11,19 +11,21 @@ COPY requirements.txt ./
 COPY app.py ./
 
 # Install dependencies
-RUN pip install --upgrade pip
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir --root-user-action=ignore -r requirements.txt
 
-RUN pip install --no-cache-dir --root-user-action=ignore -r requirements.txt
-
-# Set permissions and switch to non-root
+# Set permissions
 RUN chown -R appuser:appgroup /app
-USER appuser
 
+# Declare ARG and ENV
 ARG APP_VERSION=unknown
-ENV APP_VERSION=$APP_VERSION
+ENV APP_VERSION=${APP_VERSION}
 
-# embed version in a file for access in Python
-RUN echo $APP_VERSION > /app/VERSION
+# Write version to file during build (use ARG instead of ENV)
+RUN echo "${APP_VERSION}" > /app/VERSION
+
+# Switch to non-root user
+USER appuser
 
 EXPOSE 5000
 CMD ["python", "app.py"]
