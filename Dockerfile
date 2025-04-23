@@ -19,5 +19,11 @@ RUN pip install --no-cache-dir --root-user-action=ignore -r requirements.txt
 RUN chown -R appuser:appgroup /app
 USER appuser
 
+ARG APP_VERSION=unknown
+ENV APP_VERSION=$APP_VERSION
+
+# embed version in a file for access in Python
+RUN echo $APP_VERSION > /app/VERSION
+
 EXPOSE 5000
 CMD ["python", "app.py"]

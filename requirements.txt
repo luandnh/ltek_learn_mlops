@@ -3,3 +3,4 @@ scikit-learn==1.6.1
 xgboost==3.0.0
 loguru==0.7.3
 pandas==2.2.3
+flask-restx

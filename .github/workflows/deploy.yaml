@@ -109,7 +109,7 @@ jobs:
       BUILDX_PLATFORMS: ${{ needs.setup_build_env.outputs.gh_buildx_platforms }}
     steps:
       - name: Extract tag name
-        run: echo "TAG_NAME=${GITHUB_REF##*/}" >> $GITHUB_ENV
+        run: echo "APP_VERSION=${GITHUB_REF##*/}" >> $GITHUB_ENV
 
       - name: Download mlruns logs
         uses: actions/download-artifact@v4
@@ -120,14 +120,14 @@ jobs:
       - name: Set Docker Tag
         run: |
           BRANCH_TAG="bugs"
-          if [[ "${TAG_NAME}" == *dev* ]]; then
+          if [[ "${APP_VERSION}" == *dev* ]]; then
             BRANCH_TAG="dev"
-          elif [[ "${TAG_NAME}" == *staging* ]]; then
+          elif [[ "${APP_VERSION}" == *staging* ]]; then
             BRANCH_TAG="staging"
-          elif [[ "${TAG_NAME}" == *fix* ]]; then
+          elif [[ "${APP_VERSION}" == *fix* ]]; then
             BRANCH_TAG="fix"
           fi
-          VERSION_TAG=$(echo "${TAG_NAME}" | sed -E 's/-[a-zA-Z0-9]+$//')
+          VERSION_TAG=$(echo "${APP_VERSION}" | sed -E 's/-[a-zA-Z0-9]+$//')
           IMAGE_TAG="${BRANCH_TAG}-${VERSION_TAG}"
           echo "BRANCH_TAG=${BRANCH_TAG}" >> $GITHUB_ENV
           echo "VERSION_TAG=${VERSION_TAG}" >> $GITHUB_ENV
@@ -161,6 +161,8 @@ jobs:
           platforms: ${{ env.BUILDX_PLATFORMS }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
+          build-args: |
+            APP_VERSION=${{ env.APP_VERSION }}
 
       - name: Notify via Telegram
         uses: appleboy/telegram-action@master
@@ -171,8 +173,8 @@ jobs:
           message: |
             🚀 *MLflow Flask API Deployed*
             🔹 Repo: [${{ github.repository }}](https://github.com/${{ github.repository }})
-            🔹 Branch: `${{ github.ref_name }}`
-            🔹 Tags: `${{ env.IMAGE_TAG }}`
+            🔹 Tag: `${{ env.APP_VERSION }}`
+            🔹 Image: `${{ env.IMAGE_TAG }}`
             🔹 [CI Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
 
   deploy_dev:
