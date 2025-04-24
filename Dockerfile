@@ -7,11 +7,13 @@ RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
 
 # Set workdir and copy app files
 WORKDIR /app
-COPY requirements.txt ./
-COPY app.py ./
+# COPY requirements.txt ./
+# COPY app.py ./
 
-# Copy mlruns folder
-COPY mlruns/ ./mlruns/
+# # Copy mlruns folder
+# COPY mlruns/ ./mlruns/
+
+COPY . .
 
 # Install dependencies
 RUN pip install --upgrade pip && \
