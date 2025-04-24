@@ -99,7 +99,7 @@ jobs:
 
   build_and_push:
     name: 🛠️ Build & Push Docker Image
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: setup_build_env
     env:
       BRANCH_TAG: dev
@@ -115,13 +115,13 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: mlruns-logs
-          path: mlruns_test
+          path: mlruns
 
       - name: Download model comparison results
         uses: actions/download-artifact@v4
         with:
           name: model-results
-          path: model_results_test
+          path: model_results
 
       - name: Set Docker Tag
         run: |
