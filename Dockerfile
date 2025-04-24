@@ -10,6 +10,9 @@ WORKDIR /app
 COPY requirements.txt ./
 COPY app.py ./
 
+# Copy mlruns folder
+COPY mlruns/ ./mlruns/
+
 # Install dependencies
 RUN pip install --upgrade pip && \
     pip install --no-cache-dir --root-user-action=ignore -r requirements.txt
