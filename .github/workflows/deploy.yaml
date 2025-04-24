@@ -115,7 +115,13 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: mlruns-logs
-          path: mlruns
+          path: mlruns_test
+
+      - name: Download model comparison results
+        uses: actions/download-artifact@v4
+        with:
+          name: model-results
+          path: model_results_test
 
       - name: Set Docker Tag
         run: |
@@ -205,21 +211,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Download model comparison results
-        uses: actions/download-artifact@v4
-        with:
-          name: model-results
-          path: model_results
-
-      - name: Display best model info from JSON
-        run: |
-          echo "📊 Model Comparison Summary:"
-          cat model_results/model_comparison_results.json | jq '.best_model' || echo "⚠️ Failed to read best_model"
-
-      - name: Copy model comparison results
-        run: |
-          cp -Rf model_results ${{ env.PROJECT_FOLDER }}
-
       - name: Extract tag and version
         run: |
           TAG_NAME=${GITHUB_REF##*/}
@@ -253,21 +244,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Download model comparison results
-        uses: actions/download-artifact@v4
-        with:
-          name: model-results
-          path: model_results
-
-      - name: Display best model info from JSON
-        run: |
-          echo "📊 Model Comparison Summary:"
-          cat model_results/model_comparison_results.json | jq '.best_model' || echo "⚠️ Failed to read best_model"
-
-      - name: Copy model comparison results
-        run: |
-          cp -Rf model_results ${{ env.PROJECT_FOLDER }}
-
       - name: Extract tag and version
         run: |
           TAG_NAME=${GITHUB_REF##*/}
@@ -300,21 +276,6 @@ jobs:
       PROJECT_FOLDER: /home/ltek/projects/mlflow-flask-api-prod
     steps:
       - uses: actions/checkout@v4
-
-      - name: Download model comparison results
-        uses: actions/download-artifact@v4
-        with:
-          name: model-results
-          path: model_results
-
-      - name: Display best model info from JSON
-        run: |
-          echo "📊 Model Comparison Summary:"
-          cat model_results/model_comparison_results.json | jq '.best_model' || echo "⚠️ Failed to read best_model"
-
-      - name: Copy model comparison results
-        run: |
-          cp -Rf model_results ${{ env.PROJECT_FOLDER }}
 
       - name: Extract tag and version
         run: |
