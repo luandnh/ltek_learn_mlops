@@ -177,14 +177,12 @@ jobs:
             🔹 Image: `${{ env.IMAGE_TAG }}`
             🔹 [CI Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
 
-  deploy_dev:
-    name: 🚀 Deploy to Dev
+  deploy_mlflow_ui:
+    name: 🚀 Deploy MLflow UI
     runs-on: self-hosted
     needs: build_and_push
     if: github.ref_type == 'tag' && contains(github.ref, 'dev')
     env:
-      BRANCH_TAG: dev
-      PROJECT_FOLDER: /home/ltek/projects/mlflow-flask-api-dev
       MLFLOW_UI_FOLDER: /home/ltek/projects/mlflow-ui
     steps:
       - uses: actions/checkout@v4
@@ -195,6 +193,32 @@ jobs:
           cd ${{ env.MLFLOW_UI_FOLDER }}
           chmod +x ./scripts/sync_mlruns_artifact.sh
           GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} ./scripts/sync_mlruns_artifact.sh ${{ github.run_id }}
+
+  deploy_dev:
+    name: 🚀 Deploy to Dev
+    runs-on: self-hosted
+    needs: build_and_push
+    if: github.ref_type == 'tag' && contains(github.ref, 'dev')
+    env:
+      BRANCH_TAG: dev
+      PROJECT_FOLDER: /home/ltek/projects/mlflow-flask-api-dev
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download model comparison results
+        uses: actions/download-artifact@v4
+        with:
+          name: model-results
+          path: model_results
+
+      - name: Display best model info from JSON
+        run: |
+          echo "📊 Model Comparison Summary:"
+          cat model_results/model_comparison_results.json | jq '.best_model' || echo "⚠️ Failed to read best_model"
+
+      - name: Copy model comparison results
+        run: |
+          cp -Rf model_results ${{ env.PROJECT_FOLDER }}
 
       - name: Extract tag and version
         run: |
@@ -226,23 +250,34 @@ jobs:
     env:
       BRANCH_TAG: staging
       PROJECT_FOLDER: /home/ltek/projects/mlflow-flask-api-staging
-      MLFLOW_UI_FOLDER: /home/ltek/projects/mlflow-ui
     steps:
       - uses: actions/checkout@v4
-      - name: Sync mlruns from artifact
+
+      - name: Download model comparison results
+        uses: actions/download-artifact@v4
+        with:
+          name: model-results
+          path: model_results
+
+      - name: Display best model info from JSON
         run: |
-          cp -Rf scripts ${{ env.MLFLOW_UI_FOLDER }}
-          cd ${{ env.MLFLOW_UI_FOLDER }}
-          chmod +x ./scripts/sync_mlruns_artifact.sh
-          ./scripts/sync_mlruns_artifact.sh ${{ github.run_id }}
+          echo "📊 Model Comparison Summary:"
+          cat model_results/model_comparison_results.json | jq '.best_model' || echo "⚠️ Failed to read best_model"
+
+      - name: Copy model comparison results
+        run: |
+          cp -Rf model_results ${{ env.PROJECT_FOLDER }}
+
       - name: Extract tag and version
         run: |
           TAG_NAME=${GITHUB_REF##*/}
           echo "IMAGE_TAG=${{ env.BRANCH_TAG }}-${TAG_NAME}" >> $GITHUB_ENV
+
       - name: Deploy with Docker Compose
         run: |
           cd ${{ env.PROJECT_FOLDER }}
           API_VERSION=${{ env.IMAGE_TAG }} docker compose pull && docker compose up -d
+
       - name: Telegram Notify
         uses: appleboy/telegram-action@master
         with:
@@ -263,23 +298,34 @@ jobs:
     env:
       BRANCH_TAG: prod
       PROJECT_FOLDER: /home/ltek/projects/mlflow-flask-api-prod
-      MLFLOW_UI_FOLDER: /home/ltek/projects/mlflow-ui
     steps:
       - uses: actions/checkout@v4
-      - name: Sync mlruns from artifact
+
+      - name: Download model comparison results
+        uses: actions/download-artifact@v4
+        with:
+          name: model-results
+          path: model_results
+
+      - name: Display best model info from JSON
         run: |
-          cp -Rf scripts ${{ env.MLFLOW_UI_FOLDER }}
-          cd ${{ env.MLFLOW_UI_FOLDER }}
-          chmod +x ./scripts/sync_mlruns_artifact.sh
-          ./scripts/sync_mlruns_artifact.sh ${{ github.run_id }}
+          echo "📊 Model Comparison Summary:"
+          cat model_results/model_comparison_results.json | jq '.best_model' || echo "⚠️ Failed to read best_model"
+
+      - name: Copy model comparison results
+        run: |
+          cp -Rf model_results ${{ env.PROJECT_FOLDER }}
+
       - name: Extract tag and version
         run: |
           TAG_NAME=${GITHUB_REF##*/}
           echo "IMAGE_TAG=${{ env.BRANCH_TAG }}-${TAG_NAME}" >> $GITHUB_ENV
+
       - name: Deploy with Docker Compose
         run: |
           cd ${{ env.PROJECT_FOLDER }}
           API_VERSION=${{ env.IMAGE_TAG }} docker compose pull && docker compose up -d
+
       - name: Telegram Notify
         uses: appleboy/telegram-action@master
         with:
