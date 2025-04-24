@@ -99,7 +99,7 @@ jobs:
 
   build_and_push:
     name: 🛠️ Build & Push Docker Image
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     needs: setup_build_env
     env:
       BRANCH_TAG: dev
@@ -110,18 +110,6 @@ jobs:
     steps:
       - name: Extract tag name
         run: echo "APP_VERSION=${GITHUB_REF##*/}" >> $GITHUB_ENV
-
-      - name: Download mlruns logs
-        uses: actions/download-artifact@v4
-        with:
-          name: mlruns-logs
-          path: mlruns
-
-      - name: Download model comparison results
-        uses: actions/download-artifact@v4
-        with:
-          name: model-results
-          path: model_results
 
       - name: Set Docker Tag
         run: |
@@ -211,6 +199,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Download mlruns logs
+        uses: actions/download-artifact@v4
+        with:
+          name: mlruns-logs
+          path: mlruns
+
+      - name: Download model comparison results
+        uses: actions/download-artifact@v4
+        with:
+          name: model-results
+          path: model_results
+
+      - name: Copy necessary files
+        run: |
+          cp -Rf model_results ${{ env.PROJECT_FOLDER }}
+          cp -Rf mlruns ${{ env.PROJECT_FOLDER }}
+
       - name: Extract tag and version
         run: |
           TAG_NAME=${GITHUB_REF##*/}
@@ -243,6 +248,24 @@ jobs:
       PROJECT_FOLDER: /home/ltek/projects/mlflow-flask-api-staging
     steps:
       - uses: actions/checkout@v4
+  
+      - name: Download mlruns logs
+        uses: actions/download-artifact@v4
+        with:
+          name: mlruns-logs
+          path: mlruns
+
+      - name: Download model comparison results
+        uses: actions/download-artifact@v4
+        with:
+          name: model-results
+          path: model_results
+
+      - name: Copy necessary files
+        run: |
+          cp -Rf model_results ${{ env.PROJECT_FOLDER }}
+          cp -Rf mlruns ${{ env.PROJECT_FOLDER }}
+
 
       - name: Extract tag and version
         run: |
@@ -276,6 +299,24 @@ jobs:
       PROJECT_FOLDER: /home/ltek/projects/mlflow-flask-api-prod
     steps:
       - uses: actions/checkout@v4
+
+      - name: Download mlruns logs
+        uses: actions/download-artifact@v4
+        with:
+          name: mlruns-logs
+          path: mlruns
+
+      - name: Download model comparison results
+        uses: actions/download-artifact@v4
+        with:
+          name: model-results
+          path: model_results
+
+      - name: Copy necessary files
+        run: |
+          cp -Rf model_results ${{ env.PROJECT_FOLDER }}
+          cp -Rf mlruns ${{ env.PROJECT_FOLDER }}
+
 
       - name: Extract tag and version
         run: |

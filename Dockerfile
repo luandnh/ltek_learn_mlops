@@ -4,10 +4,10 @@ LABEL maintainer="luandnh98@gmail.com"
 
 # Set workdir and copy app files
 WORKDIR /app
-# COPY requirements.txt ./
-# COPY app.py ./
 
-COPY . /app/
+# Copy files
+COPY requirements.txt ./
+COPY app.py ./
 
 # Install dependencies
 RUN pip install --upgrade pip && \
