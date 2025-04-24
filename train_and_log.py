@@ -18,6 +18,9 @@ from datetime import datetime
 ENVIRONMENT = os.getenv("ENVIRONMENT", "DEV").upper()
 logger.info(f"Running in environment: {ENVIRONMENT}")
 
+EXPERIMENT_NAME = "mlflow_full_model_comparison"
+ARTIFACT_ROOT = os.getenv("MLFLOW_ARTIFACT_ROOT", "file:/app/mlruns")
+
 # Setup logging
 warnings.filterwarnings("ignore")
 logger.add("training.log", rotation="1 MB", level="DEBUG")
@@ -115,7 +118,21 @@ else:
     model_configs = dev_model_configs
 
 # 3. Set MLflow experiment
-mlflow.set_experiment("mlflow_full_model_comparison")
+client = MlflowClient()
+try:
+    experiment = client.get_experiment_by_name(EXPERIMENT_NAME)
+    if experiment is None:
+        experiment_id = client.create_experiment(
+            EXPERIMENT_NAME, artifact_location=ARTIFACT_ROOT
+        )
+    else:
+        experiment_id = experiment.experiment_id
+except Exception as e:
+    logger.error(f"Error setting up experiment: {e}")
+    raise e
+
+mlflow.set_experiment(EXPERIMENT_NAME)
+
 
 best_acc = 0.0
 best_run_id = None
