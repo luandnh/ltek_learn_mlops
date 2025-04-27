@@ -32,8 +32,6 @@ jobs:
     name: 🛠️ Build MLflow All-in-One Image
     runs-on: ubuntu-latest
     needs: build_and_test
-    outputs:
-      image_tag: ${{ steps.set_tag.outputs.IMAGE_TAG }}
     steps:
       - uses: actions/checkout@v4
 
@@ -114,9 +112,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Export IMAGE_TAG
-        run: echo "IMAGE_TAG=${{ needs.build_image.outputs.image_tag }}" >> $GITHUB_ENV
-
       - name: Extract tag and set ENVIRONMENT
         run: |
           TAG_NAME=${GITHUB_REF##*/}
@@ -129,6 +124,11 @@ jobs:
             ENVIRONMENT="FIX"
           fi
           echo "ENVIRONMENT=$ENVIRONMENT" >> $GITHUB_ENV
+      
+      - name: Extract tag and version
+        run: |
+          TAG_NAME=${GITHUB_REF##*/}
+          echo "IMAGE_TAG=${{ env.BRANCH_TAG }}-${TAG_NAME}" >> $GITHUB_ENV
 
       - name: Print image tag
         run: |
@@ -199,8 +199,10 @@ jobs:
           cp -Rf model_results ${{ env.PROJECT_FOLDER }}
           cp -Rf mlruns ${{ env.PROJECT_FOLDER }}
 
-      - name: Export IMAGE_TAG
-        run: echo "IMAGE_TAG=${{ needs.build_image.outputs.image_tag }}" >> $GITHUB_ENV
+      - name: Extract tag and version
+        run: |
+          TAG_NAME=${GITHUB_REF##*/}
+          echo "IMAGE_TAG=${{ env.BRANCH_TAG }}-${TAG_NAME}" >> $GITHUB_ENV
 
       - name: Deploy with Docker Compose
         run: |
@@ -247,8 +249,10 @@ jobs:
           cp -Rf model_results ${{ env.PROJECT_FOLDER }}
           cp -Rf mlruns ${{ env.PROJECT_FOLDER }}
 
-      - name: Export IMAGE_TAG
-        run: echo "IMAGE_TAG=${{ needs.build_image.outputs.image_tag }}" >> $GITHUB_ENV
+      - name: Extract tag and version
+        run: |
+          TAG_NAME=${GITHUB_REF##*/}
+          echo "IMAGE_TAG=${{ env.BRANCH_TAG }}-${TAG_NAME}" >> $GITHUB_ENV
 
       - name: Deploy with Docker Compose
         run: |
@@ -295,8 +299,10 @@ jobs:
           cp -Rf model_results ${{ env.PROJECT_FOLDER }}
           cp -Rf mlruns ${{ env.PROJECT_FOLDER }}
 
-      - name: Export IMAGE_TAG
-        run: echo "IMAGE_TAG=${{ needs.build_image.outputs.image_tag }}" >> $GITHUB_ENV
+      - name: Extract tag and version
+        run: |
+          TAG_NAME=${GITHUB_REF##*/}
+          echo "IMAGE_TAG=${{ env.BRANCH_TAG }}-${TAG_NAME}" >> $GITHUB_ENV
 
       - name: Deploy with Docker Compose
         run: |
