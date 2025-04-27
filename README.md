@@ -13,10 +13,10 @@ The main objectives include training multiple models, tuning their hyperparamete
 
 ```mermaid
 flowchart TD
-    A[Data Generation\n(make_classification)] --> B[Training Script\n(train_and_log.py)]
-    B --> C[MLflow Tracking Server\n(mruns/ folder)]
-    C --> D[Model Registry\n(BestClassifierModel)]
-    D --> E[Flask Web App\n(app.py)]
+    A[Data Generation<br/>(make_classification)] --> B[Training Script<br/>(train_and_log.py)]
+    B --> C[MLflow Tracking Server<br/>(mlruns/ folder)]
+    C --> D[Model Registry<br/>(BestClassifierModel)]
+    D --> E[Flask Web App<br/>(app.py)]
     E --> F[Prediction API Endpoints]
 ```
 
@@ -27,9 +27,9 @@ flowchart TD
 ```mermaid
 flowchart TD
     Start[Push Git Tag] --> BuildAndTest
-    BuildAndTest[Build and Lint Test (build_and_test)] --> BuildImage
-    BuildImage[Build Docker Image (build_image)] --> TrainModel
-    TrainModel[Train Model Inside Docker (train_model)] --> UploadArtifacts
+    BuildAndTest[Build and Lint Test<br/>build_and_test] --> BuildImage
+    BuildImage[Build Docker Image<br/>build_image] --> TrainModel
+    TrainModel[Train Model Inside Docker<br/>train_model] --> UploadArtifacts
 
     UploadArtifacts -->|Artifacts Uploaded| DeployChoice
 
@@ -38,13 +38,13 @@ flowchart TD
     DeployChoice -- staging --> DeployStaging
     DeployChoice -- prod --> DeployProduction
 
-    DeployDev[Deploy to Development Server (deploy_dev)]
-    DeployStaging[Deploy to Staging Server (deploy_staging)]
-    DeployProduction[Deploy to Production Server (deploy_production)]
+    DeployDev[Deploy to Development Server<br/>deploy_dev]
+    DeployStaging[Deploy to Staging Server<br/>deploy_staging]
+    DeployProduction[Deploy to Production Server<br/>deploy_production]
 
     TrainModel --> DeployMLflowUI
 
-    DeployMLflowUI[Deploy MLflow UI (sync_mlruns)]
+    DeployMLflowUI[Deploy MLflow UI<br/>sync_mlruns]
 ```
 
 ---
