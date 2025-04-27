@@ -191,6 +191,11 @@ jobs:
           name: model-results
           path: model_results
 
+      - name: Remove existing files
+        run: |
+          rm -rf ${{ env.PROJECT_FOLDER }}/mlruns
+          rm -rf ${{ env.PROJECT_FOLDER }}/model_results
+
       - name: Copy necessary files
         run: |
           cp -Rf model_results ${{ env.PROJECT_FOLDER }}
@@ -239,6 +244,11 @@ jobs:
           name: model-results
           path: model_results
 
+      - name: Remove existing files
+        run: |
+          rm -rf ${{ env.PROJECT_FOLDER }}/mlruns
+          rm -rf ${{ env.PROJECT_FOLDER }}/model_results
+
       - name: Copy necessary files
         run: |
           cp -Rf model_results ${{ env.PROJECT_FOLDER }}
@@ -286,6 +296,11 @@ jobs:
         with:
           name: model-results
           path: model_results
+
+      - name: Remove existing files
+        run: |
+          rm -rf ${{ env.PROJECT_FOLDER }}/mlruns
+          rm -rf ${{ env.PROJECT_FOLDER }}/model_results
 
       - name: Copy necessary files
         run: |
