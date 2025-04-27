@@ -14,6 +14,10 @@ try:
 except FileNotFoundError:
     APP_VERSION = "unknown"
 
+HOST = os.getenv("HOST", "0.0.0.0")
+PORT = os.getenv("PORT", 8000)
+DEBUG = os.getenv("DEBUG", False)
+
 MODEL_NAME = os.getenv("MODEL_NAME", "BestClassifierModel")
 MODEL_STAGE = os.getenv("MODEL_STAGE", "latest")
 
@@ -185,4 +189,4 @@ class Predict(Resource):
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5000)
+    app.run(debug=DEBUG, host=HOST, port=PORT)
