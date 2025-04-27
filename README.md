@@ -232,8 +232,3 @@ Example response:
 ## License
 
 This project is licensed for educational and experimental purposes.
-
----
-
-If you want, I can also generate a **Mermaid.js diagram** for you (if you plan to render it nicely on GitHub Pages or a Docs website)!  
-Just say "_yes, show mermaid version_" 🚀
