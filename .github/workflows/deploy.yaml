@@ -48,8 +48,14 @@ jobs:
           elif [[ "${APP_VERSION}" == *fix* ]]; then
             BRANCH_TAG="fix"
           fi
+
+          # Extract VERSION_TAG (remove suffix like -dev, -uat, etc.)
           VERSION_TAG=$(echo "${APP_VERSION}" | sed -E 's/-[a-zA-Z0-9]+$//')
+
+          # Construct IMAGE_TAG
           IMAGE_TAG="${BRANCH_TAG}-${VERSION_TAG}"
+
+          # Export variables
           echo "BRANCH_TAG=${BRANCH_TAG}" >> $GITHUB_ENV
           echo "VERSION_TAG=${VERSION_TAG}" >> $GITHUB_ENV
           echo "IMAGE_TAG=${IMAGE_TAG}" >> $GITHUB_ENV
@@ -118,6 +124,10 @@ jobs:
             ENVIRONMENT="FIX"
           fi
           echo "ENVIRONMENT=$ENVIRONMENT" >> $GITHUB_ENV
+
+      - name: Print image tag
+        run: |
+          echo "IMAGE_TAG=${{ env.IMAGE_TAG }}"
 
       - name: Train model in Docker container
         run: |
@@ -216,7 +226,7 @@ jobs:
       PROJECT_FOLDER: /home/ltek/projects/mlflow-flask-api-staging
     steps:
       - uses: actions/checkout@v4
-  
+
       - name: Download mlruns logs
         uses: actions/download-artifact@v4
         with:
@@ -233,7 +243,6 @@ jobs:
         run: |
           cp -Rf model_results ${{ env.PROJECT_FOLDER }}
           cp -Rf mlruns ${{ env.PROJECT_FOLDER }}
-
 
       - name: Extract tag and version
         run: |
@@ -284,7 +293,6 @@ jobs:
         run: |
           cp -Rf model_results ${{ env.PROJECT_FOLDER }}
           cp -Rf mlruns ${{ env.PROJECT_FOLDER }}
-
 
       - name: Extract tag and version
         run: |
