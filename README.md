@@ -13,11 +13,11 @@ The main objectives include training multiple models, tuning their hyperparamete
 
 ```mermaid
 flowchart TD
-    A[Data Generation<br/>(make_classification)] --> B[Training Script<br/>(train_and_log.py)]
-    B --> C[MLflow Tracking Server<br/>(mlruns/ folder)]
-    C --> D[Model Registry<br/>(BestClassifierModel)]
-    D --> E[Flask Web App<br/>(app.py)]
-    E --> F[Prediction API Endpoints]
+    A["Data Generation<br>(make_classification)"] --> B["Training Script<br>(train_and_log.py)"]
+    B --> C["MLflow Tracking Server<br>(mlruns/ folder)"]
+    C --> D["Model Registry<br>(BestClassifierModel)"]
+    D --> E["Flask Web App<br>(app.py)"]
+    E --> F["Prediction API Endpoints"]
 ```
 
 ---
