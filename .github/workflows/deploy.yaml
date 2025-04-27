@@ -131,15 +131,20 @@ jobs:
             -e MLFLOW_ARTIFACT_ROOT=file:/app/mlruns \
             ${{ env.DOCKER_IMAGE }}:${{ env.APP_VERSION }}
 
-      - name: Upload training artifacts
+      - name: Upload model comparison results
         uses: actions/upload-artifact@v4
         with:
-          name: training-artifacts
+          name: model-results
           path: |
             model_comparison_results.json
             model_comparison_results.csv
             training.log
-            mlruns/
+
+      - name: Upload mlruns logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: mlruns-logs
+          path: mlruns/
 
   deploy_mlflow_ui:
     name: 🚀 Deploy MLflow UI
