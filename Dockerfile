@@ -29,8 +29,10 @@ EXPOSE 8000
 
 # Run app (can be overridden by CMD)
 # Run train or api depending on MODE
-CMD if [ "$MODE" = "training" ]; then \
-      python train_and_log.py; \
+CMD if [ "$MODE" = "train_basic" ]; then \
+      python train_basic.py; \
+    elif [ "$MODE" = "train_advanced" ]; then \
+      python train_mlflow.py; \
     else \
       python app.py; \
     fi

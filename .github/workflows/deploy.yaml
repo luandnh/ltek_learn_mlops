@@ -126,7 +126,7 @@ jobs:
           docker run --rm \
             -v ${{ github.workspace }}:/app \
             -w /app \
-            -e MODE=training \
+            -e MODE=train_basic \
             -e ENVIRONMENT=${{ env.ENVIRONMENT }} \
             -e MLFLOW_ARTIFACT_ROOT=file:/app/mlruns \
             ${{ env.DOCKER_IMAGE }}:${{ env.APP_VERSION }}
