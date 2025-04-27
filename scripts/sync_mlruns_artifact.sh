@@ -52,7 +52,6 @@ echo "📂 Extracting and syncing to '$TARGET_DIR'..."
 rsync -a "$TEMP_DIR/" "$TARGET_DIR/"
 
 # ----------- CLEANUP -----------
-cd ..
 rm -rf "$TEMP_DIR"
 
 echo "✅ Sync completed. mlruns is available at: $TARGET_DIR"
