@@ -93,7 +93,7 @@ flowchart TD
 
 ```bash
 ├── app.py                          # Flask API serving the best model
-├── train_and_log.py                # Training script to run experiments and log results
+├── train_basic.py                  # Training script to run experiments and log results
 ├── test_best_model.py              # Test script to validate model loading and prediction
 ├── Dockerfile                      # Dockerfile for building and running the project
 ├── requirements.txt                # Python dependencies
