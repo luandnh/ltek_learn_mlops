@@ -163,6 +163,11 @@ jobs:
           chmod +x ./scripts/sync_mlruns_artifact.sh
           GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} ./scripts/sync_mlruns_artifact.sh ${{ github.run_id }}
 
+      - name: Deploy with Docker Compose
+        run: |
+          cd ${{ env.MLFLOW_UI_FOLDER }}
+          docker compose down && docker compose up -d
+
   deploy_dev:
     name: 🚀 Deploy to Dev
     runs-on: self-hosted
